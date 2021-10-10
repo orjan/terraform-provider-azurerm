@@ -197,6 +197,11 @@ func resourceAppService() *pluginsdk.Resource {
 					Type: pluginsdk.TypeString,
 				},
 			},
+
+			"key_vault_reference_identity_id": {
+				Type:     pluginsdk.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -283,6 +288,8 @@ func resourceAppServiceCreate(d *pluginsdk.ResourceData, meta interface{}) error
 	siteEnvelope.SiteProperties.ClientAffinityEnabled = utils.Bool(d.Get("client_affinity_enabled").(bool))
 
 	siteEnvelope.SiteProperties.ClientCertEnabled = utils.Bool(d.Get("client_cert_enabled").(bool))
+
+	siteEnvelope.SiteProperties.KeyVaultReferenceIdentity = utils.String(d.Get("key_vault_reference_identity_id").(string))
 
 	createFuture, err := client.CreateOrUpdate(ctx, resourceGroup, name, siteEnvelope)
 	if err != nil {
@@ -399,6 +406,7 @@ func resourceAppServiceUpdate(d *pluginsdk.ResourceData, meta interface{}) error
 	}
 
 	siteEnvelope.SiteProperties.ClientCertEnabled = utils.Bool(d.Get("client_cert_enabled").(bool))
+	siteEnvelope.SiteProperties.KeyVaultReferenceIdentity = utils.String(d.Get("key_vault_reference_identity_id").(string))
 
 	future, err := client.CreateOrUpdate(ctx, id.ResourceGroup, id.SiteName, siteEnvelope)
 	if err != nil {
@@ -685,6 +693,8 @@ func resourceAppServiceRead(d *pluginsdk.ResourceData, meta interface{}) error {
 		}
 		d.Set("custom_domain_verification_id", props.CustomDomainVerificationID)
 	}
+
+	d.Set("key_vault_reference_identity_id", resp.KeyVaultReferenceIdentity)
 
 	appSettings := flattenAppServiceAppSettings(appSettingsResp.Properties)
 
